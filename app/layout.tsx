@@ -19,14 +19,14 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://dashboard_ooi.vercel.app"),
 
   title: {
-    default: "Queue Monitoring Dashboard",
+    default: "Dashboard",
     template: "%s | Queue Monitoring Dashboard",
   },
   description:
     "서버·Queue·Topic 상태를 한눈에 모니터링할 수 있는 관제용 대시보드입니다.",
 
   icons: {
-    icon: "/logo48.png",
+    icon: "/icons96.png",
   },
 
   openGraph: {
