@@ -39,5 +39,5 @@ jobs:
       #   run: yarn test
       #   continue-on-error: true
 
-      # - name: Build (Next.js)
-      #   run: yarn build
+      - name: Build (Next.js)
+        run: yarn build
