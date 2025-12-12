@@ -16,14 +16,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://dashboard_ooi.vercel.app"),
+  metadataBase: new URL("https://dashboardooi.vercel.app"),
 
   title: {
     default: "Dashboard",
-    template: "%s | Queue Monitoring Dashboard",
+    template: "%s | Monitoring Dashboard",
   },
   description:
-    "서버·Queue·Topic 상태를 한눈에 모니터링할 수 있는 관제용 대시보드입니다.",
+    "Server·Queue·Topic 상태를 한눈에 모니터링할 수 있는 관제용 대시보드입니다.",
 
   icons: {
     icon: "/icons96.png",
@@ -33,8 +33,8 @@ export const metadata: Metadata = {
     title: "Queue / Topic / Server Monitoring Dashboard",
     description:
       "빌드, 큐, 토픽, 서버 리소스를 통합해서 모니터링하는 대시보드 UI입니다.",
-    url: "https://dashboard_ooi.vercel.app",
-    siteName: "Queue Monitoring Dashboard",
+    url: "https://dashboardooi.vercel.app",
+    siteName: "Monitoring Dashboard",
     images: [
       {
         url: "/thumbnail.png",
