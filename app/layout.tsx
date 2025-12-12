@@ -16,27 +16,43 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Monitoring",
-  description: "monitoring",
+  metadataBase: new URL("https://dashboard_ooi.vercel.app"),
+
+  title: {
+    default: "Queue Monitoring Dashboard",
+    template: "%s | Queue Monitoring Dashboard",
+  },
+  description:
+    "서버·Queue·Topic 상태를 한눈에 모니터링할 수 있는 관제용 대시보드입니다.",
+
   icons: {
     icon: "/logo48.png",
   },
+
   openGraph: {
-    title: "Monitoring",
-    description: "monitoring",
-    url: "https://monitoring.vercel.app",
-    siteName: "monitoring",
+    title: "Queue / Topic / Server Monitoring Dashboard",
+    description:
+      "빌드, 큐, 토픽, 서버 리소스를 통합해서 모니터링하는 대시보드 UI입니다.",
+    url: "https://dashboard_ooi.vercel.app",
+    siteName: "Queue Monitoring Dashboard",
     images: [
       {
-        url: "https://monitoring.vercel.app/sumnail.png",
-
+        url: "/thumbnail.png",
         width: 1200,
         height: 630,
-        alt: "monitoring 대표 이미지",
+        alt: "Queue / Topic / Server 모니터링 대시보드 대표 이미지",
       },
     ],
     locale: "ko_KR",
     type: "website",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "Queue / Topic / Server Monitoring Dashboard",
+    description:
+      "서버와 메시지 인프라 상태를 한눈에 보는 다크 테마 관제 대시보드.",
+    images: ["/thumbnail.png"],
   },
 };
 
