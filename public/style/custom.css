@@ -1,0 +1,97 @@
+/* ===========================
+   Tabulator 다크 테마 기본 톤
+   =========================== */
+
+.tabulator {
+  background-color: #252526 !important; /* bg-bg-default */
+  border: 1px solid #3c3c3c !important; /* border-border-default */
+  color: #8c959f !important; /* text-text-deep */
+  font-size: 11px;
+  font-weight: 400;
+}
+
+/* 헤더 영역 */
+.tabulator .tabulator-header .tabulator-col .tabulator-col-content {
+  background-color: #1e1e1e !important; /* bg-bg-dark */
+}
+
+/* 헤더 컬럼 셀 */
+.tabulator .tabulator-header .tabulator-col {
+  color: #8c959f !important; /* text-text-default */
+}
+
+.tabulator .tabulator-header .tabulator-col:hover {
+  background-color: #2a2d2e !important; /* bg-bg-hover */
+}
+
+/* 헤더 텍스트 / 정렬 아이콘 색상 */
+.tabulator .tabulator-header .tabulator-col .tabulator-col-title {
+  color: #8c959f !important;
+}
+
+.tabulator .tabulator-header .tabulator-col .tabulator-arrow {
+  border-bottom-color: #3c3c3c !important; /* text-text-soft */
+}
+
+/* 기본 row 스타일 */
+.tabulator .tabulator-row {
+  background-color: #252526 !important;
+  color: #9ca3af !important;
+  border-bottom: 1px solid #3c3c3c !important;
+}
+
+/* zebra 패턴 (짝수행 살짝 다른 톤) */
+.tabulator .tabulator-row:nth-child(even) {
+  /* background-color: #1f1f1f !important; */
+}
+
+.tabulator .tabulator-row {
+  background-color: #1e1e1e !important;
+}
+
+/* hover 시 */
+.tabulator .tabulator-row:hover {
+  background-color: #2d2d30 !important;
+}
+
+/* 셀 보더 */
+.tabulator .tabulator-row .tabulator-cell {
+  /* border-right: 1px solid #2d2d30 !important; */
+}
+
+.tabulator-row.tabulator-selected {
+  background-color: #569cd6 !important;
+  color: #ffffff !important;
+}
+
+/* ===========================
+   Footer / Pagination
+   =========================== */
+
+.tabulator .tabulator-footer {
+  background-color: #1e1e1e !important;
+  border-top: 1px solid #2d2d30 !important;
+  color: #d4d4d4 !important;
+}
+
+.tabulator .tabulator-footer .tabulator-page {
+  color: #e5e7eb !important;
+  background: transparent !important;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.tabulator .tabulator-footer .tabulator-page:not(.active):hover {
+  background: #2a2d2e !important;
+}
+
+.tabulator .tabulator-footer .tabulator-page.active {
+  color: #ffffff !important;
+  background: #4ec9b0 !important; /* point 색 */
+}
+
+/* footer 텍스트 */
+.tabulator .tabulator-footer .tabulator-page-counter,
+.tabulator .tabulator-footer .tabulator-page-size {
+  color: #9ca3af !important;
+}
