@@ -9,7 +9,7 @@ const NavItem = ({ onClick }: NavItemProps) => {
   const pathname = usePathname();
 
   const navItems = {
-    dashboard: { label: "Overview", path: "/dashboard" },
+    dashboard: { label: "Overview", path: "/" },
     server: { label: "Server", path: "/dashboard/server" },
     queue: { label: "Queue", path: "/dashboard/queue" },
     topic: { label: "Topic", path: "/dashboard/topic" },
