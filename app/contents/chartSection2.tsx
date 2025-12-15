@@ -32,7 +32,7 @@ const ChartSection2 = ({ data }: ChartSection) => {
             },
           ]}
           options={{
-            height: 240,
+            height: 220,
             showLegend: true,
             legendPosition: "bottom",
             animationOff: true,
