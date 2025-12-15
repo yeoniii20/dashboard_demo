@@ -4,68 +4,68 @@ interface NavItemProps {
   onClick: () => void;
 }
 
+type NavLink = {
+  key: string;
+  label: string;
+  path: string;
+};
+
+type NavSection = {
+  title: string;
+  items: NavLink[];
+};
+
 const NavItem = ({ onClick }: NavItemProps) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const navItems = {
-    dashboard: { label: "Overview", path: "/" },
-    server: { label: "Server", path: "/dashboard/server" },
-    queue: { label: "Queue", path: "/dashboard/queue" },
-    topic: { label: "Topic", path: "/dashboard/topic" },
-  };
+  const sections: NavSection[] = [
+    {
+      title: "Dashboard",
+      items: [{ key: "dashboard", label: "Overview", path: "/" }],
+    },
+    {
+      title: "Detail",
+      items: [
+        { key: "server", label: "Server", path: "/dashboard/server" },
+        { key: "queue", label: "Queue", path: "/dashboard/queue" },
+        { key: "topic", label: "Topic", path: "/dashboard/topic" },
+        { key: "status", label: "Status", path: "/dashboard/status" },
+      ],
+    },
+  ];
 
   const handleNavClick = (path: string) => {
     router.push(path);
     onClick();
   };
 
+  const isActive = (path: string) =>
+    pathname === path || (path !== "/" && pathname.startsWith(path));
+
   return (
     <nav className="flex-1 space-y-3 px-2 py-3 text-13 text-text-soft">
-      <div>
-        <div className="mb-2 text-11 font-semibold uppercase text-text-deep">
-          Dashboard
-        </div>
-        <button
-          className={`flex w-full items-center rounded px-2 py-1 text-left text-12m hover:bg-bg-hover ${
-            pathname === navItems.dashboard.path ? "bg-bg-hover" : ""
-          }`}
-          onClick={() => handleNavClick(navItems.dashboard.path)}
-        >
-          <span>{navItems.dashboard.label}</span>
-        </button>
-      </div>
+      {sections.map((section) => (
+        <div key={section.title}>
+          <div className="mb-2 text-11r font-semibold uppercase text-text-deep">
+            {section.title}
+          </div>
 
-      <div>
-        <div className="mb-2 text-11 font-semibold uppercase text-text-deep">
-          Detail
+          {section.items.map((item) => (
+            <button
+              key={item.key}
+              className={`flex w-full items-center rounded px-2 py-1 text-left text-12m hover:bg-bg-hover ${
+                isActive(item.path) ? "bg-bg-hover" : ""
+              }`}
+              onClick={() => handleNavClick(item.path)}
+            >
+              <span>{item.label}</span>
+            </button>
+          ))}
         </div>
-        <button
-          className={`flex w-full items-center rounded px-2 py-1 text-left text-12m hover:bg-bg-hover ${
-            pathname === navItems.server.path ? "bg-bg-hover" : ""
-          }`}
-          onClick={() => handleNavClick(navItems.server.path)}
-        >
-          <span>{navItems.server.label}</span>
-        </button>
-        <button
-          className={`flex w-full items-center rounded px-2 py-1 text-left text-12m hover:bg-bg-hover ${
-            pathname === navItems.queue.path ? "bg-bg-hover" : ""
-          }`}
-          onClick={() => handleNavClick(navItems.queue.path)}
-        >
-          <span>{navItems.queue.label}</span>
-        </button>
-        <button
-          className={`flex w-full items-center rounded px-2 py-1 text-left text-12m hover:bg-bg-hover ${
-            pathname === navItems.topic.path ? "bg-bg-hover" : ""
-          }`}
-          onClick={() => handleNavClick(navItems.topic.path)}
-        >
-          <span>{navItems.topic.label}</span>
-        </button>
-      </div>
+      ))}
     </nav>
   );
 };
+
 export default NavItem;
