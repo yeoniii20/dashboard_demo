@@ -33,7 +33,7 @@ export default function TopicDashboardContent() {
               서버별 Topic의 메시지 처리량 트렌드를 모니터링합니다.
             </p>
             {selectedServer && (
-              <p className="text-11 text-text-deep">
+              <p className="text-11r text-text-deep">
                 Selected server:{" "}
                 <span className="text-sub_point">{selectedServer.label}</span>{" "}
                 <span className="text-text-soft">
@@ -46,7 +46,7 @@ export default function TopicDashboardContent() {
           <div className="flex flex-col gap-2 md:flex-row md:items-center">
             {/* 서버 선택 */}
             <div className="flex flex-col gap-1">
-              <label className="text-11 text-text-soft">Server</label>
+              <label className="text-11r text-text-soft">Server</label>
               <select
                 value={selectedServerId}
                 onChange={(e) => setSelectedServerId(e.target.value)}
@@ -62,7 +62,7 @@ export default function TopicDashboardContent() {
 
             {/* Topic 이름 검색 */}
             <div className="flex flex-col gap-1 md:ml-3">
-              <label className="text-11 text-text-soft">Search topic</label>
+              <label className="text-11r text-text-soft">Search topic</label>
               <input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
