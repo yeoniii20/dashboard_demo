@@ -72,7 +72,7 @@ const ChartSection1 = ({ data, points }: ChartSectionProps) => {
             },
           ]}
           options={{
-            height: 240,
+            height: 220,
             showLegend: true,
             legendPosition: "bottom",
             useCustomLegend: true,
