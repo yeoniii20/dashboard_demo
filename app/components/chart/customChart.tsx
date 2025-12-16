@@ -21,12 +21,18 @@ import {
   Radar,
   PolarArea,
 } from "react-chartjs-2";
-
 import "chartjs-adapter-date-fns";
 import { useEffect, useRef, useState } from "react";
 import { merge } from "lodash";
 import { ChartSkeleton } from "../skeleton/chartSkeleton";
 import { addAlphaToHex } from "@/app/utils/alphaToHex";
+import { exportChartDataToXlsx } from "@/app/utils/chart/exportChartDataToXlsx";
+import ChartDownloadButton from "../button/chartDownloadButton";
+import {
+  buildDatasetLegendItems,
+  renderLegendDOM,
+  buildPieLegendItems,
+} from "@/app/utils/chart/chartLegend";
 
 ChartJS.register(
   CategoryScale,
@@ -41,7 +47,19 @@ ChartJS.register(
   Legend,
   Filler
 );
-
+// Chart.js에 전달할 "데이터셋" 타입 정의
+// - label: 범례(legend)에 표시될 이름
+// - data: 실제 데이터 (차트 타입마다 형태가 달라 any로 둠)
+//   - line/bar: 보통 number[] 또는 {x,y}[]
+//   - pie/doughnut: number[]
+//   - bubble: {x:number,y:number,r:number}[]
+// - backgroundColor/borderColor: 단일 색상 또는 데이터 포인트별 색상 배열
+// - fill: line 차트에서 영역 채우기 여부
+// - tension: line 곡선 부드러움(0이면 직선에 가까움)
+// - borderDash: 점선 스타일(ex: [5,5])
+// - pointRadius: line 차트 점 크기
+// - borderWidth: 선/테두리 두께
+// - chartType: 하나의 위젯에서 line+bar 섞어 그릴 때(혼합 차트) 구분용
 type Dataset = {
   label: string;
   data: any;
@@ -55,22 +73,53 @@ type Dataset = {
   chartType?: "line" | "bar";
 };
 
+// 차트 위젯 컴포넌트 Props
+// - type: 기본 차트 타입 (전체 차트의 기본 형태)
+// - datasets: 렌더링할 데이터셋 목록
+// - options: 스타일/동작 커스터마이징 옵션 묶음
+// - onElementClick: 차트 요소 클릭 시(막대/포인트/파이 조각) 콜백
+// - download: 다운로드 기능(예: 이미지 저장 버튼) 노출 여부
 type ChartWidgetProps = {
   type: "line" | "bar" | "pie" | "doughnut" | "bubble" | "radar" | "polarArea";
   datasets: Dataset[];
   options?: {
+    // 차트(또는 캔버스) 기본 배경색
     backgroundColor?: string;
+
+    // 기본 테두리 색(필요 시 전역 기본값처럼 사용)
     borderColor?: string;
+
+    // 기본 범례 표시 여부
     showLegend?: boolean;
+
+    // 범례 위치
     legendPosition?: "top" | "bottom" | "left" | "right";
+
+    // 범례 텍스트 색상(다크모드 등에서 유용)
     legendColor?: string;
+
+    // 차트 높이(px). 부모 레이아웃에 따라 고정 높이 필요할 때 사용
     height?: number;
+
+    // 애니메이션 비활성화(대시보드/실시간 차트에서 성능 개선)
     animationOff?: boolean;
+
+    // 기본 legend 대신 커스텀 legend UI를 사용할지 여부
     useCustomLegend?: boolean;
+
+    // pie/doughnut 전용 커스텀 legend UI를 사용할지 여부
     useCustomPieLegend?: boolean;
-    /** x축 tick 개수 제한 (옵셔널) */
+
+    // x축 tick(눈금) 개수 제한: 데이터가 많을 때 라벨 겹침 방지용
     tickCount?: number;
   };
+
+  // 차트 요소 클릭 핸들러
+  // - datasetIndex: 클릭된 데이터셋 인덱스
+  // - index: 해당 데이터 포인트 인덱스
+  // - label: 라벨(보통 x축 또는 항목명)
+  // - value: 값(보통 y값 또는 slice 값)
+  // - datasetLabel: 클릭된 데이터셋의 label
   onElementClick?: (data: {
     datasetIndex: number;
     index: number;
@@ -78,9 +127,14 @@ type ChartWidgetProps = {
     value: any;
     datasetLabel: string;
   }) => void;
+
+  // 다운로드 기능 활성화 여부(기본 true)
   download?: boolean;
 };
 
+// CustomChart 컴포넌트 시그니처
+// - type/datasets/options 기반으로 Chart.js 컴포넌트를 렌더링하고
+// - 클릭/다운로드 등 부가 기능을 제공하는 래퍼 역할
 const CustomChart = ({
   type,
   datasets,
@@ -92,7 +146,8 @@ const CustomChart = ({
   const [chartOptions, setChartOptions] = useState<any>();
   const [hovered, setHovered] = useState<boolean>(false);
   const chartRef = useRef<any>(null);
-  const legendRef = useRef<HTMLDivElement>(null);
+  const datasetLegendRef = useRef<HTMLDivElement>(null);
+  const pieLegendRef = useRef<HTMLDivElement>(null);
   const pieOriginalValuesRef = useRef<number[]>([]);
 
   const isPieChart =
@@ -153,116 +208,6 @@ const CustomChart = ({
           },
         }
       : undefined,
-  };
-
-  const renderPieLegend = (chart: any) => {
-    const legendContainer = legendRef.current;
-    if (!legendContainer) return;
-
-    const labels = chart.options.plugins.legend.labels.generateLabels(chart);
-    legendContainer.innerHTML = "";
-
-    labels.forEach((label: any, sliceIndex: number) => {
-      const meta = chart.getDatasetMeta(0);
-      const arc = meta.data[sliceIndex];
-
-      const isHidden = arc.hidden === true;
-
-      const item = document.createElement("div");
-      item.style.display = "flex";
-      item.style.alignItems = "center";
-      item.style.gap = "6px";
-      item.style.padding = "4px 8px";
-      item.style.cursor = "pointer";
-      item.style.userSelect = "none";
-      item.style.opacity = isHidden ? "0.4" : "1";
-
-      const colorBox = document.createElement("span");
-      colorBox.style.width = "40px";
-      colorBox.style.height = "18px";
-      const border = label.strokeStyle;
-      colorBox.style.backgroundColor = label.strokeStyle;
-      // colorBox.style.backgroundColor = addAlphaToHex(border, 0.2);
-      colorBox.style.border = `1px solid ${border}`;
-
-      const text = document.createElement("span");
-      text.textContent = label.text;
-      text.style.fontSize = "14px";
-      text.style.fontWeight = "400";
-      text.style.color = options?.legendColor ?? "#afb4bb";
-      text.style.textDecoration = isHidden ? "line-through" : "none";
-
-      item.onclick = () => {
-        arc.hidden = !arc.hidden;
-
-        chart.update();
-        renderPieLegend(chart);
-      };
-
-      item.appendChild(colorBox);
-      item.appendChild(text);
-      legendContainer.appendChild(item);
-    });
-  };
-
-  // External Legend Renderer
-  const renderExternalLegend = (chart: any) => {
-    const legendContainer = legendRef.current;
-    if (!legendContainer) return;
-
-    const labels = chart.options.plugins.legend.labels.generateLabels(chart);
-
-    // 기존 legend 초기화
-    legendContainer.innerHTML = "";
-
-    labels.forEach((label: any) => {
-      const meta = chart.getDatasetMeta(label.datasetIndex);
-      const isHidden = meta.hidden === true;
-
-      const item = document.createElement("div");
-      item.style.display = "flex";
-      item.style.alignItems = "center";
-      item.style.gap = "4px";
-      item.style.padding = "2px 4px";
-      item.style.cursor = "pointer";
-      item.style.userSelect = "none";
-
-      // 숨겨진 상태 → 흐리게
-      item.style.opacity = isHidden ? "0.4" : "1";
-
-      const colorBox = document.createElement("span");
-      colorBox.style.width = "10px";
-      colorBox.style.height = "10px";
-      const border = label.strokeStyle;
-      const background = addAlphaToHex(border, 0.2);
-
-      colorBox.style.backgroundColor = background;
-      colorBox.style.border = `1px solid ${border}`;
-      colorBox.style.borderWidth = "2px";
-
-      const text = document.createElement("span");
-      text.style.color = options?.legendColor ?? "#afb4bb";
-      text.style.fontSize = "12px";
-      text.textContent = label.text;
-
-      // 가운데 선(취소선) 적용
-      text.style.textDecoration = isHidden ? "line-through" : "none";
-
-      item.onclick = () => {
-        const meta = chart.getDatasetMeta(label.datasetIndex);
-        meta.hidden = meta.hidden === null ? true : !meta.hidden;
-        chart.update();
-
-        // hidden state 반영
-        const nowHidden = meta.hidden === true;
-        item.style.opacity = nowHidden ? "0.4" : "1";
-        text.style.textDecoration = nowHidden ? "line-through" : "none";
-      };
-
-      item.appendChild(colorBox);
-      item.appendChild(text);
-      legendContainer.appendChild(item);
-    });
   };
 
   useEffect(() => {
@@ -517,21 +462,46 @@ const CustomChart = ({
 
     setChartData({ datasets: transformed });
     setChartOptions(finalOptions);
-  }, [datasets, options, isPieChart]);
+  }, [datasets, options, isPieChart, type]);
 
-  // legend 렌더링 적용
   useEffect(() => {
     if (!chartRef.current || !chartData) return;
     const chart = chartRef.current;
+    const legendColor = options?.legendColor ?? "#afb4bb";
 
-    if (options?.useCustomLegend) {
-      renderExternalLegend(chart);
+    if (options?.useCustomLegend && datasetLegendRef.current) {
+      const rerender = () => {
+        const items = buildDatasetLegendItems(chart);
+        renderLegendDOM({
+          container: datasetLegendRef.current!,
+          items,
+          legendColor,
+          variant: "dataset",
+          rerender,
+        });
+      };
+      rerender();
     }
 
-    if (options?.useCustomPieLegend) {
-      renderPieLegend(chart);
+    if (options?.useCustomPieLegend && pieLegendRef.current) {
+      const rerender = () => {
+        const items = buildPieLegendItems(chart);
+        renderLegendDOM({
+          container: pieLegendRef.current!,
+          items,
+          legendColor,
+          variant: "pie",
+          rerender,
+        });
+      };
+      rerender();
     }
-  }, [chartData, options?.useCustomLegend, options?.useCustomPieLegend]);
+  }, [
+    chartData,
+    options?.useCustomLegend,
+    options?.useCustomPieLegend,
+    options?.legendColor,
+  ]);
 
   const handleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     if (!chartRef.current || !chartData || !onElementClick) return;
@@ -558,28 +528,12 @@ const CustomChart = ({
   const handleDownloadExcel = async () => {
     if (!chartData) return;
 
-    const XLSX = await import("xlsx");
-    const { saveAs } = await import("file-saver");
-
-    const dataForExcel = chartData.datasets[0].data.map((point: any) => ({
-      Time: new Date(point.x).toLocaleString(),
-      Value: point.y,
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "ChartData");
-
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
+    await exportChartDataToXlsx({
+      chartData,
+      type,
+      filename: "chart_data.xlsx",
+      sheetName: "ChartData",
     });
-
-    const blob = new Blob([excelBuffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
-    });
-
-    saveAs(blob, "chart_data.xlsx");
   };
 
   if (!chartData) return <ChartSkeleton />;
@@ -593,27 +547,11 @@ const CustomChart = ({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {hovered && download && (
-        <div className="p_a_bl5">
-          <button
-            type="button"
-            title="download"
-            className="btn btn-icon btn-outline-light btn_t_xs"
-            onClick={handleDownloadExcel}
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              borderRadius: 4,
-              padding: 2,
-              cursor: "pointer",
-              zIndex: 10,
-            }}
-          >
-            <i className="wems_i_download2 icon-sm fs-5"></i>
-          </button>
-        </div>
-      )}
+      <ChartDownloadButton
+        visible={hovered && download}
+        onClick={handleDownloadExcel}
+        title="Download chart data"
+      />
       {type === "bar" && (
         <Bar
           ref={chartRef}
@@ -673,7 +611,7 @@ const CustomChart = ({
       {/* External Legend 영역 (스크롤 지원) */}
       {options?.useCustomLegend && (
         <div
-          ref={legendRef}
+          ref={datasetLegendRef}
           style={{
             display: "flex",
             flexDirection: "row",
@@ -684,10 +622,10 @@ const CustomChart = ({
           }}
         />
       )}
-      {/* Pie Legend 영역 */}
+
       {options?.useCustomPieLegend && (
         <div
-          ref={legendRef}
+          ref={pieLegendRef}
           style={{
             display: "flex",
             flexDirection: "column",

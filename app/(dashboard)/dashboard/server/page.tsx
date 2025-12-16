@@ -18,12 +18,12 @@ const ServerPage = () => {
   >("ALL");
 
   const columns: ColumnDefinition[] = [
-    { title: "Server", field: "name", widthGrow: 1 },
-    { title: "Cluster", field: "cluster", widthGrow: 1 },
+    { title: "Server", field: "name", width: 220 },
+    { title: "Cluster", field: "cluster", width: 180 },
     {
       title: "Role",
       field: "role",
-      width: 90,
+      width: 100,
       formatter: (cell: any) => {
         const value = cell.getValue();
         return value === "primary" ? "Primary" : "Replica";
@@ -32,14 +32,14 @@ const ServerPage = () => {
     {
       title: "Status",
       field: "status",
-      width: 100,
+      width: 120,
       formatter: (cell: any) => {
         const value: ServerRow["status"] = cell.getValue();
         const color =
           value === "Healthy"
             ? "#4ec9b0"
             : value === "Degraded"
-            ? "#d7ba7d"
+            ? "#cc9c35"
             : "#f44747";
         return `<span style="color:${color};font-weight:500;">${value}</span>`;
       },
@@ -48,31 +48,28 @@ const ServerPage = () => {
       title: "CPU %",
       field: "cpu",
       hozAlign: "right",
-      width: 90,
+      width: 120,
     },
     {
       title: "Memory %",
       field: "memory",
       hozAlign: "right",
-      width: 110,
+      width: 120,
     },
     {
       title: "Queues",
       field: "queueCount",
       hozAlign: "right",
-      width: 100,
     },
     {
       title: "Topics",
       field: "topicCount",
       hozAlign: "right",
-      width: 100,
     },
     {
       title: "Latency (ms)",
       field: "latencyMs",
       hozAlign: "right",
-      width: 125,
     },
   ];
 
@@ -100,7 +97,7 @@ const ServerPage = () => {
             <p className="text-12r text-text-soft">
               클러스터 내 서버 상태와 리소스 사용 현황을 테이블로 확인합니다.
             </p>
-            <p className="text-11 text-text-deep">
+            <p className="text-11r text-text-deep">
               Total servers:{" "}
               <span className="text-sub_point">{SERVER_DATA.length}</span> ·
               Showing:{" "}
@@ -111,7 +108,7 @@ const ServerPage = () => {
           <div className="flex flex-col gap-2 md:flex-row md:items-center">
             {/* Status 필터 */}
             <div className="flex flex-col gap-1">
-              <label className="text-11 text-text-soft">Status</label>
+              <label className="text-11r text-text-soft">Status</label>
               <select
                 value={statusFilter}
                 onChange={(e) =>
@@ -128,7 +125,7 @@ const ServerPage = () => {
 
             {/* 검색 */}
             <div className="flex flex-col gap-1 md:ml-3">
-              <label className="text-11 text-text-soft">Search</label>
+              <label className="text-11r text-text-soft">Search</label>
               <input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -153,13 +150,12 @@ const ServerPage = () => {
           <ReactTabulatorNoSSR
             data={filteredData}
             columns={columns}
-            layout={"fitColumns"}
             style={{ margin: "0rem 0rem" }}
             options={{
               //   height: 420,
-              resizableColumns: true,
-              responsiveLayout: "collapse",
+              layout: "fitColumns",
               tooltips: true,
+              placeholder: "No data found.",
             }}
           />
         </div>

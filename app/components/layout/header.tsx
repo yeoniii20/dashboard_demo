@@ -22,7 +22,7 @@ const Header = ({ onClick }: HeaderProps) => {
         <span className="hidden sm:inline">
           Status: <span className="text-sub_green">Online</span>
         </span>
-        <span className="rounded bg-bg-hover px-2 py-1 text-11 text-text-soft">
+        <span className="rounded bg-bg-hover px-2 py-1 text-11r text-text-soft">
           v0.1.0
         </span>
       </div>

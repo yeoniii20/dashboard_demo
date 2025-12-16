@@ -121,26 +121,7 @@ export default function DashboardContent() {
         }}
       />
 
-      {/* 1단: 기존 차트 2개 (Duration + Issues) */}
-      <ChartSection1
-        points={points}
-        data={{
-          buildDurationData: buildDurationData,
-          buildDurationDataPrev: buildDurationDataPrev,
-          openIssuesTotal: openIssuesTotal,
-          openIssuesCritical: openIssuesCritical,
-        }}
-      />
-
-      {/* 2단: Fancy Charts (Bubble + Radar) */}
-      <ChartSection2
-        data={{
-          bubblePerfData: bubblePerfData,
-          radarQualityData: radarQualityData,
-        }}
-      />
-
-      {/* 3단: 추가 차트 2개 (Build Success + Test Coverage) */}
+      {/* 1단: (Build Success + Test Coverage) */}
       <ChartSection3
         points={points}
         data={{
@@ -148,6 +129,23 @@ export default function DashboardContent() {
           testCoverageTrend2: testCoverageTrend2,
           buildSucceeded: buildSucceeded,
           buildFailed: buildFailed,
+        }}
+      />
+      {/* 2단: Fancy Charts (Bubble + Radar) */}
+      <ChartSection2
+        data={{
+          bubblePerfData: bubblePerfData,
+          openIssuesTotal: openIssuesTotal,
+          openIssuesCritical: openIssuesCritical,
+        }}
+      />
+      {/* 3단: (Duration + Issues) */}
+      <ChartSection1
+        points={points}
+        data={{
+          buildDurationData: buildDurationData,
+          buildDurationDataPrev: buildDurationDataPrev,
+          radarQualityData: radarQualityData,
         }}
       />
     </div>
